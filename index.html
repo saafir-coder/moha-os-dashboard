@@ -12,7 +12,7 @@
   --bg: #1d2021; --card: #282828; --border: #3c3836; --text: #ebdbb2;
   --muted: #a89984; --gold: #fabd2f; --green: #b8bb26; --yellow: #fabd2f;
   --red: #fb4934; --grey: #928374; --blue: #83a598; --purple: #d3869b;
-  --card-r: 6px;
+  --card-r: 6px; --orange: #fe8019;
 }
 body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.5; }
 .mono { font-family: 'JetBrains Mono', monospace; }
@@ -22,10 +22,15 @@ a { color: var(--blue); text-decoration: none; }
 .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
 .header-left { display: flex; align-items: center; gap: 12px; }
 .header h1 { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; letter-spacing: 2px; }
-.health-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+.health-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.health-dot.pulse { animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .header-right { display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--muted); }
 .header-right .mono { color: var(--text); }
+.freshness-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+.freshness-dot.fresh { background: var(--green); animation: pulse 2s infinite; }
+.freshness-dot.aging { background: var(--yellow); }
+.freshness-dot.stale { background: var(--red); }
 .demo-badge { background: var(--yellow); color: var(--bg); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; display: none; }
 
 /* Layout */
@@ -34,22 +39,39 @@ a { color: var(--blue); text-decoration: none; }
 
 /* Stat Cards Row */
 .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--card-r); padding: 14px 16px; text-align: center; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--card-r); padding: 14px 16px; text-align: center; transition: border-color 0.2s; }
+.stat-card.clickable { cursor: pointer; }
+.stat-card.clickable:hover { border-color: var(--red); }
 .stat-card .value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--gold); }
 .stat-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 .stat-card.green .value { color: var(--green); }
 .stat-card.red .value { color: var(--red); }
 .stat-card.grey .value { color: var(--grey); }
 
+/* SLO Overview */
+.slo-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+.slo-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--card-r); padding: 10px 14px; min-width: 180px; flex-shrink: 0; }
+.slo-card .slo-name { font-size: 12px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slo-card .slo-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.slo-card .slo-meta span { font-family: 'JetBrains Mono', monospace; }
+.mini-bar { height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+.mini-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+
 /* Department Grid */
 .dept-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.dept-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--card-r); padding: 14px 16px; }
+.dept-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--card-r); padding: 14px 16px; cursor: pointer; transition: border-color 0.2s; }
+.dept-card:hover { border-color: var(--gold); }
 .dept-card .dept-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .dept-card .dept-name { font-size: 13px; font-weight: 600; }
 .dept-card .dept-icon { font-size: 16px; }
 .dept-card .dept-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 12px; }
 .dept-card .dept-row .dept-label { color: var(--muted); }
 .dept-card .dept-row .dept-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--gold); }
+.dept-expand { display: none; grid-column: 1 / -1; background: var(--card); border: 1px solid var(--border); border-radius: var(--card-r); padding: 12px 16px; }
+.dept-expand.open { display: block; }
+.dept-expand table { width: 100%; border-collapse: collapse; }
+.dept-expand th { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.dept-expand td { padding: 6px 8px; font-size: 12px; border-bottom: 1px solid var(--border); }
 
 /* Tables */
 .data-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: var(--card-r); overflow: hidden; }
@@ -66,10 +88,34 @@ a { color: var(--blue); text-decoration: none; }
 .badge-stale { background: rgba(146,131,116,0.15); color: var(--grey); }
 .badge-active { background: rgba(184,187,38,0.15); color: var(--green); }
 .badge-inactive { background: rgba(146,131,116,0.15); color: var(--grey); }
+.badge-critical { background: rgba(251,73,52,0.2); color: var(--red); font-weight: 700; }
+.badge-warning { background: rgba(254,128,25,0.2); color: var(--orange); }
+.badge-info { background: rgba(131,165,152,0.15); color: var(--blue); }
 .clickable-row { cursor: pointer; }
-.error-detail { display: none; padding: 10px 12px; background: rgba(251,73,52,0.05); font-size: 12px; color: var(--red); border-bottom: 1px solid var(--border); }
-.error-detail.open { display: table-row; }
-.error-detail td { padding: 8px 12px 12px; }
+
+/* Budget mini bar in table */
+.budget-cell { display: flex; align-items: center; gap: 6px; }
+.budget-bar { width: 50px; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; flex-shrink: 0; }
+.budget-bar-fill { height: 100%; border-radius: 4px; }
+.budget-pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; min-width: 32px; }
+.budget-rate { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); }
+
+/* Task drill-down panel */
+.task-detail { display: none; background: rgba(40,40,40,0.95); border-bottom: 1px solid var(--border); }
+.task-detail.open { display: table-row; }
+.task-detail td { padding: 12px 16px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.detail-section { font-size: 12px; }
+.detail-section .dl { margin-top: 4px; }
+.detail-section .dl dt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 6px; }
+.detail-section .dl dd { font-family: 'JetBrains Mono', monospace; font-size: 12px; margin: 2px 0 0; }
+.error-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.error-list li { font-size: 11px; color: var(--red); padding: 3px 0; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
+.error-list li:last-child { border-bottom: none; }
+.severity-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-right: 6px; }
+.sev-critical { background: rgba(251,73,52,0.2); color: var(--red); }
+.sev-warning { background: rgba(254,128,25,0.2); color: var(--orange); }
+.sev-ok { background: rgba(184,187,38,0.15); color: var(--green); }
 
 /* Cost Tracker */
 .cost-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -77,7 +123,7 @@ a { color: var(--blue); text-decoration: none; }
 .cost-bar-container { margin-top: 8px; }
 .cost-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 12px; }
 .cost-bar-label { width: 100px; color: var(--muted); flex-shrink: 0; }
-.cost-bar-track { flex: 1; height: 16px; background: var(--bg); border-radius: 3px; overflow: hidden; position: relative; }
+.cost-bar-track { flex: 1; height: 16px; background: var(--bg); border-radius: 3px; overflow: hidden; }
 .cost-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
 .cost-bar-val { width: 60px; text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 12px; color: var(--gold); flex-shrink: 0; }
 .cost-total { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 13px; }
@@ -87,8 +133,11 @@ a { color: var(--blue); text-decoration: none; }
 .alert-feed { background: var(--card); border: 1px solid var(--border); border-radius: var(--card-r); max-height: 300px; overflow-y: auto; }
 .alert-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; }
 .alert-item:last-child { border-bottom: none; }
+.alert-item.resolved { opacity: 0.4; }
+.alert-item.resolved .alert-msg strong { text-decoration: line-through; }
 .alert-time { font-family: 'JetBrains Mono', monospace; color: var(--muted); flex-shrink: 0; white-space: nowrap; font-size: 11px; min-width: 80px; }
-.alert-system { font-weight: 600; flex-shrink: 0; min-width: 70px; }
+.alert-sev-badge { flex-shrink: 0; }
+.alert-system { font-weight: 600; flex-shrink: 0; min-width: 70px; font-size: 11px; }
 .alert-msg { flex: 1; }
 .alert-sev-info { color: var(--blue); }
 .alert-sev-warn { color: var(--yellow); }
@@ -110,12 +159,15 @@ a { color: var(--blue); text-decoration: none; }
   .dept-grid { grid-template-columns: repeat(2, 1fr); }
   .bottom-grid { grid-template-columns: 1fr; }
   .cost-grid { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .stats-row { grid-template-columns: repeat(2, 1fr); }
   .dept-grid { grid-template-columns: 1fr; }
   .header { flex-direction: column; gap: 8px; }
   .container { padding: 10px 12px; }
+  .slo-row { flex-direction: column; }
+  .slo-card { min-width: auto; }
 }
 </style>
 </head>
@@ -124,11 +176,11 @@ a { color: var(--blue); text-decoration: none; }
 <div class="header">
   <div class="header-left">
     <h1>ABDILLAHI OS</h1>
-    <span class="health-dot" id="healthDot" style="background:var(--grey)"></span>
+    <span class="health-dot pulse" id="healthDot" style="background:var(--grey)"></span>
     <span class="demo-badge" id="demoBadge">DEMO</span>
   </div>
   <div class="header-right">
-    <span>Last updated: <span class="mono" id="lastUpdated">--</span></span>
+    <span><span class="freshness-dot" id="freshDot"></span>Last updated: <span class="mono" id="lastUpdated">--</span></span>
     <span>Next refresh: <span class="mono" id="nextRefresh">60s</span></span>
   </div>
 </div>
@@ -139,21 +191,26 @@ a { color: var(--blue); text-decoration: none; }
   <div class="stats-row" id="statsRow">
     <div class="stat-card"><div class="value mono" id="statTotal">--</div><div class="label">Total Systems</div></div>
     <div class="stat-card green"><div class="value mono" id="statHealthy">--</div><div class="label">Healthy</div></div>
-    <div class="stat-card red"><div class="value mono" id="statFailing">--</div><div class="label">Failing</div></div>
+    <div class="stat-card red clickable" id="failingCard" onclick="filterFailing()"><div class="value mono" id="statFailing">--</div><div class="label">Failing (click)</div></div>
     <div class="stat-card grey"><div class="value mono" id="statStale">--</div><div class="label">Stale</div></div>
     <div class="stat-card"><div class="value mono" id="statUptime">--</div><div class="label">Uptime</div></div>
   </div>
 
+  <!-- SLO Status -->
+  <div class="section-title">SLO Status</div>
+  <div class="slo-row" id="sloRow"></div>
+
   <!-- Departments -->
   <div class="section-title">Departments</div>
   <div class="dept-grid" id="deptGrid"></div>
+  <div class="dept-expand" id="deptExpand"></div>
 
   <!-- Trigger.dev Tasks -->
-  <div class="section-title">Trigger.dev Tasks</div>
+  <div class="section-title" id="tasksSection">Trigger.dev Tasks</div>
   <div style="overflow-x:auto">
     <table class="data-table" id="tasksTable">
       <thead><tr>
-        <th>Task</th><th>Status</th><th>Last Run</th><th>Runs (24h)</th><th>Avg Duration</th><th>Errors</th>
+        <th>Task</th><th>Status</th><th>Budget</th><th>Last Run</th><th>Runs (24h)</th><th>Avg Duration</th><th>Errors</th>
       </tr></thead>
       <tbody id="tasksBody"></tbody>
     </table>
@@ -198,15 +255,26 @@ const POLL_INTERVAL = 60;
 let isDemo = false;
 let countdown = POLL_INTERVAL;
 let lastFetchTime = null;
+let currentTasks = [];
+let filterMode = null; // null or 'failing'
+let expandedTask = null;
+let expandedDept = null;
+
+// Department mapping
+const DEPT_MAP = {
+  content: /^(linkedin-|brief-|generate-|render-|auto-publisher|content-scorer|image-generator|daily-digest|approval-handler|brief-seeder|brief-generator)/,
+  sales: /^(job-|pipeline|qualify-|find-|add-|create-|log-|scrape-|lead-|ai-feed)/,
+  monitoring: /^(system-monitor|cost-tracker|pipeline-dashboard|token-refresher|memory-sync|janitor|youtube-analytics)/
+};
+function getTaskDept(name) {
+  for (const [dept, rx] of Object.entries(DEPT_MAP)) { if (rx.test(name)) return dept; }
+  return 'other';
+}
 
 // === Supabase Query ===
 async function query(table, params = '') {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
-    headers: {
-      'apikey': SUPABASE_ANON_KEY,
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'Accept-Profile': 'monitoring'
-    }
+    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Accept-Profile': 'monitoring' }
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
@@ -214,35 +282,44 @@ async function query(table, params = '') {
 
 // === Demo Data ===
 function getDemoSnapshot() {
+  const t = (ms) => new Date(Date.now() - ms).toISOString();
+  const mkTask = (name, status, last_run, runs, dur, errs, slo, budgetTotal, budgetUsed, budgetRem, burn, exhaust, lastErr, errors) => ({
+    name, status, last_run, runs_24h: runs, avg_duration_s: dur, errors_24h: errs,
+    slo, errorBudgetTotal: budgetTotal, errorBudgetUsed: budgetUsed,
+    errorBudgetRemaining: budgetRem, burnRate: burn, budgetExhaustedInDays: exhaust,
+    last_error: lastErr || null, errors: errors || []
+  });
   return {
     snapshot_data: {
       tasks: [
-        { name: 'auto-publisher', status: 'ok', last_run: new Date(Date.now() - 3600000).toISOString(), runs_24h: 4, avg_duration_s: 12.3, errors_24h: 0 },
-        { name: 'metrics-collector', status: 'ok', last_run: new Date(Date.now() - 7200000).toISOString(), runs_24h: 6, avg_duration_s: 8.1, errors_24h: 0 },
-        { name: 'brief-generator', status: 'ok', last_run: new Date(Date.now() - 1800000).toISOString(), runs_24h: 3, avg_duration_s: 15.7, errors_24h: 0 },
-        { name: 'content-scorer', status: 'failing', last_run: new Date(Date.now() - 900000).toISOString(), runs_24h: 8, avg_duration_s: 5.2, errors_24h: 3, last_error: 'Anthropic API rate limit exceeded' },
-        { name: 'image-generator', status: 'ok', last_run: new Date(Date.now() - 5400000).toISOString(), runs_24h: 4, avg_duration_s: 22.1, errors_24h: 0 },
-        { name: 'daily-digest', status: 'ok', last_run: new Date(Date.now() - 14400000).toISOString(), runs_24h: 1, avg_duration_s: 3.4, errors_24h: 0 },
-        { name: 'janitor', status: 'ok', last_run: new Date(Date.now() - 21600000).toISOString(), runs_24h: 1, avg_duration_s: 1.8, errors_24h: 0 },
-        { name: 'experiment-runner', status: 'stale', last_run: new Date(Date.now() - 172800000).toISOString(), runs_24h: 0, avg_duration_s: 0, errors_24h: 0 },
-        { name: 'system-monitor', status: 'ok', last_run: new Date(Date.now() - 600000).toISOString(), runs_24h: 4, avg_duration_s: 6.5, errors_24h: 0 },
-        { name: 'lead-scraper', status: 'ok', last_run: new Date(Date.now() - 10800000).toISOString(), runs_24h: 2, avg_duration_s: 45.3, errors_24h: 0 },
-        { name: 'lead-enricher', status: 'ok', last_run: new Date(Date.now() - 10800000).toISOString(), runs_24h: 2, avg_duration_s: 18.9, errors_24h: 0 },
-        { name: 'ai-feed-daily', status: 'ok', last_run: new Date(Date.now() - 28800000).toISOString(), runs_24h: 1, avg_duration_s: 34.2, errors_24h: 0 },
-        { name: 'approval-handler', status: 'ok', last_run: new Date(Date.now() - 7200000).toISOString(), runs_24h: 5, avg_duration_s: 2.1, errors_24h: 0 },
-        { name: 'pipeline-dashboard', status: 'ok', last_run: new Date(Date.now() - 3600000).toISOString(), runs_24h: 24, avg_duration_s: 1.2, errors_24h: 0 },
-        { name: 'brief-seeder', status: 'stale', last_run: new Date(Date.now() - 259200000).toISOString(), runs_24h: 0, avg_duration_s: 0, errors_24h: 0 },
-        { name: 'token-refresher', status: 'ok', last_run: new Date(Date.now() - 86400000).toISOString(), runs_24h: 1, avg_duration_s: 4.7, errors_24h: 0 },
-        { name: 'cost-tracker', status: 'ok', last_run: new Date(Date.now() - 21600000).toISOString(), runs_24h: 4, avg_duration_s: 3.3, errors_24h: 0 },
-        { name: 'youtube-analytics', status: 'ok', last_run: new Date(Date.now() - 43200000).toISOString(), runs_24h: 2, avg_duration_s: 11.8, errors_24h: 0 },
-        { name: 'memory-sync', status: 'ok', last_run: new Date(Date.now() - 36000000).toISOString(), runs_24h: 2, avg_duration_s: 7.4, errors_24h: 0 },
+        mkTask('auto-publisher', 'ok', t(3600000), 4, 12.3, 0, 0.95, 15, 2, 87, 0.8, 45, null, []),
+        mkTask('metrics-collector', 'ok', t(7200000), 6, 8.1, 0, 0.99, 3, 0, 100, 0.0, 999, null, []),
+        mkTask('brief-generator', 'ok', t(1800000), 3, 15.7, 0, 0.95, 15, 1, 93, 0.4, 60, null, []),
+        mkTask('content-scorer', 'failing', t(900000), 8, 5.2, 3, 0.95, 15, 12, 20, 4.8, 2,
+          'Anthropic API rate limit exceeded',
+          ['Anthropic API 429 at 14:32', 'Anthropic API 429 at 14:15', 'Timeout after 30s at 13:50', 'Anthropic API 429 at 13:22', 'Connection reset at 12:55']),
+        mkTask('image-generator', 'ok', t(5400000), 4, 22.1, 0, 0.90, 30, 8, 73, 1.1, 20, null, []),
+        mkTask('daily-digest', 'ok', t(14400000), 1, 3.4, 0, 0.99, 3, 0, 100, 0.0, 999, null, []),
+        mkTask('janitor', 'ok', t(21600000), 1, 1.8, 0, 0.99, 3, 0, 100, 0.0, 999, null, []),
+        mkTask('experiment-runner', 'stale', t(172800000), 0, 0, 0, 0.90, 30, 5, 83, 0.5, 50, null, []),
+        mkTask('system-monitor', 'ok', t(600000), 4, 6.5, 0, 0.999, 1, 0, 100, 0.0, 999, null, []),
+        mkTask('lead-scraper', 'ok', t(10800000), 2, 45.3, 0, 0.90, 30, 4, 87, 0.6, 43, null, []),
+        mkTask('lead-enricher', 'ok', t(10800000), 2, 18.9, 0, 0.90, 30, 3, 90, 0.5, 54, null, []),
+        mkTask('ai-feed-daily', 'ok', t(28800000), 1, 34.2, 0, 0.95, 15, 1, 93, 0.4, 60, null, []),
+        mkTask('approval-handler', 'ok', t(7200000), 5, 2.1, 0, 0.99, 3, 0, 100, 0.0, 999, null, []),
+        mkTask('pipeline-dashboard', 'ok', t(3600000), 24, 1.2, 0, 0.99, 3, 0, 100, 0.0, 999, null, []),
+        mkTask('brief-seeder', 'stale', t(259200000), 0, 0, 0, 0.95, 15, 3, 80, 0.7, 28, null, []),
+        mkTask('token-refresher', 'ok', t(86400000), 1, 4.7, 0, 0.99, 3, 0, 100, 0.0, 999, null, []),
+        mkTask('cost-tracker', 'ok', t(21600000), 4, 3.3, 0, 0.99, 3, 0, 100, 0.0, 999, null, []),
+        mkTask('youtube-analytics', 'ok', t(43200000), 2, 11.8, 0, 0.95, 15, 2, 87, 0.8, 37, null, []),
+        mkTask('memory-sync', 'ok', t(36000000), 2, 7.4, 0, 0.95, 15, 1, 93, 0.4, 60, null, []),
       ],
       n8n_workflows: [
-        { name: 'LinkedIn Generate Brief', active: true, last_execution: new Date(Date.now() - 7200000).toISOString(), errors: 0 },
-        { name: 'LinkedIn Approval Bot', active: true, last_execution: new Date(Date.now() - 3600000).toISOString(), errors: 0 },
-        { name: 'Gmail Upwork Notifier', active: true, last_execution: new Date(Date.now() - 1800000).toISOString(), errors: 0 },
-        { name: 'Daily Cost Report', active: true, last_execution: new Date(Date.now() - 86400000).toISOString(), errors: 1 },
-        { name: 'Webhook Publisher', active: false, last_execution: new Date(Date.now() - 172800000).toISOString(), errors: 0 },
+        { name: 'LinkedIn Generate Brief', active: true, last_execution: t(7200000), errors: 0 },
+        { name: 'LinkedIn Approval Bot', active: true, last_execution: t(3600000), errors: 0 },
+        { name: 'Gmail Upwork Notifier', active: true, last_execution: t(1800000), errors: 0 },
+        { name: 'Daily Cost Report', active: true, last_execution: t(86400000), errors: 1 },
+        { name: 'Webhook Publisher', active: false, last_execution: t(172800000), errors: 0 },
       ],
       departments: {
         content: { briefs_queued: 39, posts_today: 4, engagement_rate: 3.2 },
@@ -252,29 +329,21 @@ function getDemoSnapshot() {
         finance: { monthly_cost_est: 47.50 },
         attention: { focus: 'Deploy auto-publisher fix + seed briefs' }
       },
-      costs: {
-        apify: 4.20,
-        anthropic: 18.50,
-        n8n_cloud: 0,
-        trigger_dev: 0,
-        supabase: 0,
-        other: 3.80,
-        total: 26.50,
-        projected: 47.50
-      }
+      costs: { apify: 4.20, anthropic: 18.50, n8n_cloud: 0, trigger_dev: 0, supabase: 0, other: 3.80, total: 26.50, projected: 47.50 }
     },
     created_at: new Date().toISOString()
   };
 }
 
 function getDemoAlerts() {
+  const t = (ms) => new Date(Date.now() - ms).toISOString();
   return [
-    { created_at: new Date(Date.now() - 300000).toISOString(), system: 'trigger', severity: 'error', title: 'content-scorer rate limited', details: 'Anthropic API 429 — 3 failures in last hour', resolved: false },
-    { created_at: new Date(Date.now() - 1800000).toISOString(), system: 'trigger', severity: 'warn', title: 'experiment-runner stale', details: 'No runs in 48h — may need manual trigger', resolved: false },
-    { created_at: new Date(Date.now() - 3600000).toISOString(), system: 'n8n', severity: 'warn', title: 'Daily Cost Report failed', details: 'HTTP 500 from cost API endpoint', resolved: false },
-    { created_at: new Date(Date.now() - 7200000).toISOString(), system: 'trigger', severity: 'info', title: 'auto-publisher completed', details: 'Published 4 posts successfully', resolved: true },
-    { created_at: new Date(Date.now() - 14400000).toISOString(), system: 'supabase', severity: 'info', title: 'health snapshot written', details: 'All 19 tasks checked', resolved: true },
-    { created_at: new Date(Date.now() - 28800000).toISOString(), system: 'trigger', severity: 'warn', title: 'brief-seeder stale', details: 'No runs in 72h — 39 briefs remaining', resolved: false },
+    { created_at: t(300000), system: 'content-scorer', severity: 'critical', title: 'Budget < 3 days', details: 'Error budget at 20%, burn rate 4.8x. Exhausted in ~2 days.', resolved: false, department: 'content' },
+    { created_at: t(1800000), system: 'experiment-runner', severity: 'warn', title: 'Stale — no runs in 48h', details: 'May need manual trigger. Burn rate 0.5x (healthy).', resolved: false, department: 'content' },
+    { created_at: t(3600000), system: 'Daily Cost Report', severity: 'warn', title: 'n8n workflow failed', details: 'HTTP 500 from cost API endpoint', resolved: false, department: 'monitoring' },
+    { created_at: t(7200000), system: 'auto-publisher', severity: 'info', title: 'Published 4 posts', details: 'All posts succeeded. Burn rate 0.8x (under budget).', resolved: true, department: 'content' },
+    { created_at: t(14400000), system: 'system-monitor', severity: 'info', title: 'Health snapshot written', details: 'All 19 tasks checked', resolved: true, department: 'monitoring' },
+    { created_at: t(28800000), system: 'brief-seeder', severity: 'warn', title: 'Stale — no runs in 72h', details: '39 briefs remaining. Burn rate 0.7x.', resolved: false, department: 'content' },
   ];
 }
 
@@ -288,8 +357,7 @@ function timeAgo(iso) {
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 function statusBadge(status) {
@@ -297,26 +365,49 @@ function statusBadge(status) {
   return `<span class="badge ${map[status] || 'badge-stale'}">${(status || 'unknown').toUpperCase()}</span>`;
 }
 
-function sevClass(sev) {
-  return `alert-sev-${sev || 'info'}`;
-}
-
 function esc(s) {
   if (!s) return '';
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
 }
 
 function fmtDuration(s) {
   if (!s || s === 0) return '--';
-  if (s < 60) return `${s.toFixed(1)}s`;
-  return `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
+  return s < 60 ? `${s.toFixed(1)}s` : `${Math.floor(s / 60)}m ${Math.round(s % 60)}s`;
 }
 
-function fmtCurrency(n) {
-  if (n == null) return '--';
-  return `EUR ${Number(n).toFixed(2)}`;
+function fmtCurrency(n) { return n == null ? '--' : `EUR ${Number(n).toFixed(2)}`; }
+
+function budgetColor(pct) {
+  if (pct > 50) return 'var(--green)';
+  if (pct > 20) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function severityForTask(t) {
+  if (t.budgetExhaustedInDays != null && t.budgetExhaustedInDays < 3) return 'CRITICAL';
+  if (t.budgetExhaustedInDays != null && t.budgetExhaustedInDays < 7) return 'WARNING';
+  return 'OK';
+}
+
+function severityBadgeHtml(sev) {
+  const cls = sev === 'CRITICAL' ? 'sev-critical' : sev === 'WARNING' ? 'sev-warning' : 'sev-ok';
+  return `<span class="severity-badge ${cls}">${sev}</span>`;
+}
+
+function alertSevBadge(sev) {
+  const colors = { critical: 'var(--red)', error: 'var(--red)', warn: 'var(--yellow)', info: 'var(--blue)' };
+  const color = colors[sev] || 'var(--muted)';
+  return `<span class="badge" style="background:${color}20;color:${color}">${(sev || 'info').toUpperCase()}</span>`;
+}
+
+// === Freshness Indicator ===
+function updateFreshness() {
+  const dot = document.getElementById('freshDot');
+  if (!lastFetchTime) { dot.className = 'freshness-dot stale'; return; }
+  const age = (Date.now() - lastFetchTime.getTime()) / 1000;
+  if (age < 120) { dot.className = 'freshness-dot fresh'; }
+  else if (age < 600) { dot.className = 'freshness-dot aging'; }
+  else { dot.className = 'freshness-dot stale'; }
 }
 
 // === Render Functions ===
@@ -334,45 +425,58 @@ function renderStats(snap) {
   document.getElementById('statStale').textContent = stale;
   document.getElementById('statUptime').textContent = `${uptime}%`;
 
-  // Health dot
   const dot = document.getElementById('healthDot');
   if (failing > 0) dot.style.background = 'var(--red)';
   else if (stale > 2) dot.style.background = 'var(--yellow)';
   else dot.style.background = 'var(--green)';
 }
 
-function renderDepartments(depts) {
+function renderSLO(tasks) {
+  const row = document.getElementById('sloRow');
+  // Show tasks with SLO defined and budget < 95% (interesting ones)
+  const critical = (tasks || []).filter(t => t.slo && t.errorBudgetRemaining < 95)
+    .sort((a, b) => (a.errorBudgetRemaining ?? 100) - (b.errorBudgetRemaining ?? 100));
+  if (critical.length === 0) {
+    row.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:8px 0">All systems within SLO budget</div>';
+    return;
+  }
+  row.innerHTML = critical.map(t => {
+    const rem = t.errorBudgetRemaining ?? 100;
+    const sloStr = `${(t.slo * 100).toFixed(0)}%`;
+    const successRate = t.slo && t.errorBudgetTotal ? `${((1 - (t.errorBudgetUsed / (t.errorBudgetTotal / (1 - t.slo)))) * 100).toFixed(1)}%` : '--';
+    const col = budgetColor(rem);
+    return `<div class="slo-card" style="border-left:3px solid ${col}">
+      <div class="slo-name">${esc(t.name)}</div>
+      <div class="slo-meta"><span>SLO ${sloStr}</span><span>${rem}% left</span></div>
+      <div class="mini-bar"><div class="mini-bar-fill" style="width:${rem}%;background:${col}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderDepartments(depts, tasks) {
   const grid = document.getElementById('deptGrid');
   if (!depts) { grid.innerHTML = '<div class="no-data">No department data</div>'; return; }
 
   const configs = [
     { key: 'content', name: 'Content Dept', icon: 'C', rows: [
-      ['Briefs Queued', depts.content?.briefs_queued],
-      ['Posts Today', depts.content?.posts_today],
+      ['Briefs Queued', depts.content?.briefs_queued], ['Posts Today', depts.content?.posts_today],
       ['Engagement', depts.content?.engagement_rate != null ? `${depts.content.engagement_rate}%` : null]
     ]},
     { key: 'sales', name: 'Sales Dept', icon: 'S', rows: [
-      ['Jobs Found', depts.sales?.jobs_found],
-      ['Qualified', depts.sales?.qualified],
-      ['Applications', depts.sales?.applications]
+      ['Jobs Found', depts.sales?.jobs_found], ['Qualified', depts.sales?.qualified], ['Applications', depts.sales?.applications]
     ]},
-    { key: 'engineering', name: 'Engineering Dept', icon: 'E', rows: [
-      ['Deploys Today', depts.engineering?.deploys_today],
-      ['Task Runs (24h)', depts.engineering?.task_runs_24h]
+    { key: 'monitoring', name: 'Monitoring Dept', icon: 'M', rows: [
+      ['Task Runs (24h)', depts.engineering?.task_runs_24h], ['Deploys Today', depts.engineering?.deploys_today]
     ]},
-    { key: 'pm', name: 'PM Dept', icon: 'P', rows: [
-      ['ClickUp Open', depts.pm?.clickup_tasks_open]
-    ]},
+    { key: 'pm', name: 'PM Dept', icon: 'P', rows: [['ClickUp Open', depts.pm?.clickup_tasks_open]]},
     { key: 'finance', name: 'Finance Dept', icon: 'F', rows: [
       ['Monthly Est.', depts.finance?.monthly_cost_est != null ? fmtCurrency(depts.finance.monthly_cost_est) : null]
     ]},
-    { key: 'attention', name: 'Attention Manager', icon: 'A', rows: [
-      ['Focus', depts.attention?.focus]
-    ]}
+    { key: 'attention', name: 'Attention Manager', icon: 'A', rows: [['Focus', depts.attention?.focus]]}
   ];
 
   grid.innerHTML = configs.map(c => `
-    <div class="dept-card">
+    <div class="dept-card" onclick="toggleDeptExpand('${c.key}')">
       <div class="dept-header">
         <span class="dept-name">${c.name}</span>
         <span class="dept-icon mono" style="color:var(--muted)">${c.icon}</span>
@@ -381,57 +485,124 @@ function renderDepartments(depts) {
         <div class="dept-row">
           <span class="dept-label">${label}</span>
           <span class="dept-val">${val != null ? esc(String(val)) : '--'}</span>
-        </div>
-      `).join('')}
+        </div>`).join('')}
     </div>
   `).join('');
 }
 
+function toggleDeptExpand(deptKey) {
+  const panel = document.getElementById('deptExpand');
+  if (expandedDept === deptKey) { panel.classList.remove('open'); expandedDept = null; return; }
+  expandedDept = deptKey;
+  const deptTasks = currentTasks.filter(t => getTaskDept(t.name) === deptKey);
+  if (deptTasks.length === 0) {
+    panel.innerHTML = `<div style="color:var(--muted);font-size:12px;padding:8px">No systems mapped to this department</div>`;
+  } else {
+    panel.innerHTML = `<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--gold)">${deptKey.toUpperCase()} SYSTEMS</div>
+    <table><thead><tr><th>System</th><th>Status</th><th>Last Run</th><th>Burn Rate</th><th>Errors (24h)</th></tr></thead>
+    <tbody>${deptTasks.map(t => `<tr>
+      <td style="font-weight:600">${esc(t.name)}</td>
+      <td>${statusBadge(t.status)}</td>
+      <td class="mono" style="font-size:11px">${timeAgo(t.last_run)}</td>
+      <td class="mono" style="font-size:11px;color:${(t.burnRate || 0) > 1 ? 'var(--red)' : 'var(--green)'}">${t.burnRate != null ? t.burnRate.toFixed(1) + 'x' : '--'}</td>
+      <td class="mono" style="font-size:11px;color:${(t.errors_24h || 0) > 0 ? 'var(--red)' : 'var(--muted)'}">${t.errors_24h ?? 0}</td>
+    </tr>`).join('')}</tbody></table>`;
+  }
+  panel.classList.add('open');
+}
+
 function renderTasks(tasks) {
+  currentTasks = tasks || [];
   const tbody = document.getElementById('tasksBody');
-  if (!tasks || tasks.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="no-data">No task data</td></tr>'; return; }
+  if (!tasks || tasks.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="no-data">No task data</td></tr>'; return; }
 
-  // Sort: failing first, stale second, ok last
   const order = { failing: 0, stale: 1, ok: 2 };
-  const sorted = [...tasks].sort((a, b) => (order[a.status] ?? 3) - (order[b.status] ?? 3));
+  let sorted = [...tasks].sort((a, b) => (order[a.status] ?? 3) - (order[b.status] ?? 3));
+  if (filterMode === 'failing') sorted = sorted.filter(t => t.status === 'failing');
 
-  tbody.innerHTML = sorted.map((t, i) => `
-    <tr class="clickable-row" onclick="toggleError(${i})">
+  tbody.innerHTML = sorted.map((t, i) => {
+    const rem = t.errorBudgetRemaining ?? 100;
+    const col = budgetColor(rem);
+    const sev = severityForTask(t);
+    const dept = getTaskDept(t.name);
+    const errors = t.errors || [];
+    const exhaustDays = t.budgetExhaustedInDays;
+    const burnExplain = exhaustDays != null && exhaustDays < 900
+      ? `At this rate, budget exhausted in ${exhaustDays} day${exhaustDays !== 1 ? 's' : ''}`
+      : 'Budget healthy — no exhaustion projected';
+
+    return `<tr class="clickable-row" onclick="toggleTaskDetail(${i})" data-idx="${i}">
       <td class="task-name">${esc(t.name)}</td>
       <td>${statusBadge(t.status)}</td>
+      <td><div class="budget-cell">
+        <div class="budget-bar"><div class="budget-bar-fill" style="width:${rem}%;background:${col}"></div></div>
+        <span class="budget-pct" style="color:${col}">${rem}%</span>
+        <span class="budget-rate">${t.burnRate != null ? t.burnRate.toFixed(1) + 'x' : '--'}</span>
+      </div></td>
       <td class="mono">${timeAgo(t.last_run)}</td>
       <td class="mono">${t.runs_24h ?? '--'}</td>
       <td class="mono">${fmtDuration(t.avg_duration_s)}</td>
       <td class="mono" style="color:${(t.errors_24h || 0) > 0 ? 'var(--red)' : 'var(--muted)'}">${t.errors_24h ?? 0}</td>
     </tr>
-    ${t.last_error ? `<tr class="error-detail" id="err-${i}"><td colspan="6">${esc(t.last_error)}</td></tr>` : ''}
-  `).join('');
+    <tr class="task-detail" id="detail-${i}"><td colspan="7">
+      <div class="detail-grid">
+        <div class="detail-section">
+          <div style="margin-bottom:8px">${severityBadgeHtml(sev)} <span style="color:var(--muted);font-size:11px">Dept: ${dept}</span></div>
+          <div class="dl">
+            <dt>SLO Target</dt><dd>${t.slo ? (t.slo * 100).toFixed(1) + '%' : '--'}</dd>
+            <dt>Error Budget</dt><dd>${t.errorBudgetUsed ?? '--'} / ${t.errorBudgetTotal ?? '--'} used</dd>
+            <dt>Budget Remaining</dt>
+            <dd><div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+              <div style="width:120px;height:10px;background:var(--bg);border-radius:5px;overflow:hidden">
+                <div style="width:${rem}%;height:100%;background:${col};border-radius:5px"></div>
+              </div><span style="color:${col}">${rem}%</span>
+            </div></dd>
+            <dt>Burn Rate</dt><dd style="color:${(t.burnRate || 0) > 1 ? 'var(--red)' : 'var(--green)'}">${t.burnRate != null ? t.burnRate.toFixed(1) + 'x' : '--'} &mdash; ${esc(burnExplain)}</dd>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Recent Errors (${errors.length})</div>
+          ${errors.length > 0
+            ? `<ul class="error-list">${errors.slice(0, 5).map(e => `<li>${esc(typeof e === 'string' ? e : e.message || JSON.stringify(e))}</li>`).join('')}</ul>`
+            : '<div style="color:var(--green);font-size:12px">No recent errors</div>'}
+        </div>
+      </div>
+    </td></tr>`;
+  }).join('');
 }
 
-function toggleError(i) {
-  const el = document.getElementById(`err-${i}`);
-  if (el) el.classList.toggle('open');
+function toggleTaskDetail(i) {
+  const el = document.getElementById(`detail-${i}`);
+  if (!el) return;
+  if (expandedTask === i) { el.classList.remove('open'); expandedTask = null; }
+  else {
+    if (expandedTask !== null) { const prev = document.getElementById(`detail-${expandedTask}`); if (prev) prev.classList.remove('open'); }
+    el.classList.add('open'); expandedTask = i;
+  }
+}
+
+function filterFailing() {
+  filterMode = filterMode === 'failing' ? null : 'failing';
+  document.getElementById('failingCard').style.borderColor = filterMode ? 'var(--red)' : '';
+  renderTasks(currentTasks);
+  document.getElementById('tasksSection').scrollIntoView({ behavior: 'smooth' });
 }
 
 function renderN8n(workflows) {
   const tbody = document.getElementById('n8nBody');
   if (!workflows || workflows.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="no-data">No workflow data</td></tr>'; return; }
-
-  tbody.innerHTML = workflows.map(w => `
-    <tr>
-      <td class="task-name">${esc(w.name)}</td>
-      <td><span class="badge ${w.active ? 'badge-active' : 'badge-inactive'}">${w.active ? 'ACTIVE' : 'INACTIVE'}</span></td>
-      <td class="mono">${timeAgo(w.last_execution)}</td>
-      <td class="mono" style="color:${(w.errors || 0) > 0 ? 'var(--red)' : 'var(--muted)'}">${w.errors ?? 0}</td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = workflows.map(w => `<tr>
+    <td class="task-name">${esc(w.name)}</td>
+    <td><span class="badge ${w.active ? 'badge-active' : 'badge-inactive'}">${w.active ? 'ACTIVE' : 'INACTIVE'}</span></td>
+    <td class="mono">${timeAgo(w.last_execution)}</td>
+    <td class="mono" style="color:${(w.errors || 0) > 0 ? 'var(--red)' : 'var(--muted)'}">${w.errors ?? 0}</td>
+  </tr>`).join('');
 }
 
 function renderCosts(costs) {
   const container = document.getElementById('costBars');
   const totalEl = document.getElementById('costTotal');
   if (!costs) { container.innerHTML = '<div class="no-data">No cost data</div>'; totalEl.textContent = '--'; return; }
-
   const items = [
     { label: 'Anthropic', val: costs.anthropic || 0, color: 'var(--purple)' },
     { label: 'Apify', val: costs.apify || 0, color: 'var(--blue)' },
@@ -441,34 +612,26 @@ function renderCosts(costs) {
     { label: 'Other', val: costs.other || 0, color: 'var(--muted)' },
   ];
   const maxVal = Math.max(...items.map(i => i.val), 1);
-
-  container.innerHTML = items.map(i => `
-    <div class="cost-bar-row">
-      <span class="cost-bar-label">${i.label}</span>
-      <div class="cost-bar-track">
-        <div class="cost-bar-fill" style="width:${(i.val / maxVal) * 100}%;background:${i.color}"></div>
-      </div>
-      <span class="cost-bar-val">${fmtCurrency(i.val)}</span>
-    </div>
-  `).join('');
-
+  container.innerHTML = items.map(i => `<div class="cost-bar-row">
+    <span class="cost-bar-label">${i.label}</span>
+    <div class="cost-bar-track"><div class="cost-bar-fill" style="width:${(i.val / maxVal) * 100}%;background:${i.color}"></div></div>
+    <span class="cost-bar-val">${fmtCurrency(i.val)}</span>
+  </div>`).join('');
   totalEl.textContent = fmtCurrency(costs.projected || costs.total || 0);
 }
 
 function renderAlerts(alerts) {
   const feed = document.getElementById('alertFeed');
   if (!alerts || alerts.length === 0) { feed.innerHTML = '<div class="no-data">No recent alerts</div>'; return; }
-
-  // Sort newest first
   const sorted = [...alerts].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
   feed.innerHTML = sorted.map(a => `
-    <div class="alert-item" style="${a.resolved ? 'opacity:0.5' : ''}">
+    <div class="alert-item ${a.resolved ? 'resolved' : ''}">
       <span class="alert-time">${timeAgo(a.created_at)}</span>
-      <span class="alert-system ${sevClass(a.severity)}">${esc(a.system)}</span>
+      <span class="alert-sev-badge">${alertSevBadge(a.severity)}</span>
+      <span class="alert-system" style="color:var(--muted)">${esc(a.system)}${a.department ? ` <span style="font-weight:400;font-size:10px;opacity:0.7">${a.department}</span>` : ''}</span>
       <span class="alert-msg">
-        <strong class="${sevClass(a.severity)}">${esc(a.title)}</strong>
-        ${a.details ? `<br><span style="color:var(--muted)">${esc(a.details)}</span>` : ''}
+        <strong class="alert-sev-${a.severity || 'info'}">${esc(a.title)}</strong>
+        ${a.details ? `<br><span style="color:var(--muted);font-size:11px">${esc(a.details)}</span>` : ''}
       </span>
     </div>
   `).join('');
@@ -481,55 +644,45 @@ async function fetchData() {
       query('health_snapshots', 'order=created_at.desc&limit=1'),
       query('alerts', 'order=created_at.desc&limit=50')
     ]);
-
     if (!snapshots || snapshots.length === 0) throw new Error('No snapshot data');
-
     const snap = snapshots[0].snapshot_data;
     isDemo = false;
     document.getElementById('demoBadge').style.display = 'none';
-
-    renderStats(snap);
-    renderDepartments(snap.departments);
-    renderTasks(snap.tasks);
-    renderN8n(snap.n8n_workflows);
-    renderCosts(snap.costs);
-    renderAlerts(alerts);
-
+    renderAll(snap, alerts);
     lastFetchTime = new Date();
     document.getElementById('lastUpdated').textContent = 'just now';
   } catch (err) {
     console.warn('Supabase unreachable, using demo data:', err.message);
     isDemo = true;
     document.getElementById('demoBadge').style.display = 'inline-block';
-
-    const demo = getDemoSnapshot();
-    const snap = demo.snapshot_data;
-    renderStats(snap);
-    renderDepartments(snap.departments);
-    renderTasks(snap.tasks);
-    renderN8n(snap.n8n_workflows);
-    renderCosts(snap.costs);
-    renderAlerts(getDemoAlerts());
-
+    const snap = getDemoSnapshot().snapshot_data;
+    renderAll(snap, getDemoAlerts());
     lastFetchTime = new Date();
     document.getElementById('lastUpdated').textContent = 'demo';
   }
+  updateFreshness();
+}
+
+function renderAll(snap, alerts) {
+  renderStats(snap);
+  renderSLO(snap.tasks);
+  renderDepartments(snap.departments, snap.tasks);
+  renderTasks(snap.tasks);
+  renderN8n(snap.n8n_workflows);
+  renderCosts(snap.costs);
+  renderAlerts(alerts);
 }
 
 // === Countdown & Polling ===
 function updateCountdown() {
   countdown--;
-  if (countdown <= 0) {
-    countdown = POLL_INTERVAL;
-    fetchData();
-  }
+  if (countdown <= 0) { countdown = POLL_INTERVAL; fetchData(); }
   document.getElementById('nextRefresh').textContent = `${countdown}s`;
-
-  // Update "last updated"
   if (lastFetchTime && !isDemo) {
     const ago = Math.floor((Date.now() - lastFetchTime.getTime()) / 1000);
     document.getElementById('lastUpdated').textContent = ago < 5 ? 'just now' : `${ago}s ago`;
   }
+  updateFreshness();
 }
 
 // === Boot ===
